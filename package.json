@@ -1,5 +1,5 @@
 {
-    "name": "wasm_hello_world",
+    "name": "wasm_rust_playground",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",

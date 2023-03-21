@@ -1,9 +1,9 @@
-import init, { greet } from "../../pkg/wasm_hello_world.js";
+import init, { MovingShape } from "../../pkg/wasm_rust_playground.js";
 
 async function run() {
   await init();
-  const message = greet('rawr');
-  document.getElementById('output').innerHTML = message;
+  const shape = new MovingShape();
+  shape.render();
 }
 
 run();

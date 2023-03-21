@@ -1,5 +1,5 @@
 [package]
-name = "wasm_hello_world"
+name = "wasm_rust_playground"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,8 @@ edition = "2021"
 
 [dependencies]
 wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["CanvasRenderingContext2d", "Document", "Element", "HtmlCanvasElement", "Window"] }
+js-sys = "0.3"
 
 [lib]
 crate-type = ["cdylib"]
