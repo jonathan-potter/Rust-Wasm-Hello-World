@@ -1,0 +1,12 @@
+{
+    "name": "wasm_hello_world",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "wasm-pack build --target web",
+        "start": "python3 -m http.server 9000"
+    },
+    "author": "Jonathan Potter",
+    "license": "UNLICENCED"
+}
