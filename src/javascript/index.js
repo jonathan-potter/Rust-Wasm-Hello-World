@@ -1,9 +1,14 @@
-import init, { MovingShape } from "../../pkg/wasm_rust_playground.js";
+import init, { Integration } from "../../pkg/wasm_rust_playground.js";
 
 async function run() {
   await init();
-  const shape = new MovingShape();
-  shape.render();
+  const integration = new Integration();
+
+  function tick () {
+    integration.tick();
+    requestAnimationFrame(tick)
+  }
+  tick()
 }
 
 run();
