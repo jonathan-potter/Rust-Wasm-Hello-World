@@ -31,9 +31,10 @@ impl Game {
     }
 
     pub fn tick(&mut self, dt: f64) {
-        self.canvas.clear();
+        // self.canvas.clear();
 
-        self.move_frame(dt);
-        self.render();
+        // self.move_frame(dt);
+        // self.render();
+        self.canvas.draw();
     }
 }

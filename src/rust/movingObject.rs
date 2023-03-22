@@ -28,7 +28,7 @@ impl MovingObject {
     }
 
     pub fn render(&mut self, canvas: &mut Canvas) {
-        canvas.drawCircle(self.x, self.y)
+        // canvas.draw(self.x, self.y);
     }
 
     pub fn move_frame(&mut self, dt: f64, width: f64, height: f64) {
