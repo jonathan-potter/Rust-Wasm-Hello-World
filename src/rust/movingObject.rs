@@ -18,12 +18,12 @@ pub struct MovingObject {
 #[wasm_bindgen]
 impl MovingObject {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> MovingObject {
+    pub fn new(x: f64, y: f64, dx: f64, dy: f64) -> MovingObject {
         MovingObject {
-            x: 100.0,
-            y: 100.0,
-            dx: 100.0,
-            dy: 100.0,
+            x,
+            y,
+            dx,
+            dy,
         }
     }
 

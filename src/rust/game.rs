@@ -10,33 +10,44 @@ use crate::MovingObject;
 #[wasm_bindgen]
 pub struct Game {
     canvas: Canvas,
-    shape: MovingObject,
+    shapes: Vec<MovingObject>,
 }
 
 #[wasm_bindgen]
 impl Game {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas: Canvas) -> Game {
+        let shapes =
+
         Game {
             canvas: canvas,
-            shape: MovingObject::new(),
+            shapes: vec![
+                MovingObject::new(100.0, 100.0, 100.0, 100.0),
+                MovingObject::new(100.0, 200.0, 100.0, 100.0),
+                MovingObject::new(100.0, 300.0, 100.0, 100.0),
+            ],
         }
     }
 
     fn render(&mut self) {
-        let positions = Array::new();
+        let positions = self.shapes.iter().map(|s| (s.x, s.y)).collect::<Vec<_>>();
+        let positions_js_array = positions
+            .iter()
+            .map(|(x, y)| {
+                let position = Array::new();
+                position.push(&JsValue::from_f64(*x as f64));
+                position.push(&JsValue::from_f64(*y as f64));
+                position
+            })
+            .collect::<Array>();
 
-        let position1 = Array::new();
-        position1.push(&JsValue::from_f64(self.shape.x));
-        position1.push(&JsValue::from_f64(self.shape.y));
-
-        positions.push(&position1);
-
-        self.canvas.render(positions);
+        self.canvas.render(positions_js_array);
     }
 
     fn move_frame(&mut self, dt: f64) {
-        self.shape.move_frame(dt, self.canvas.width, self.canvas.height);
+        for shape in &mut self.shapes {
+            shape.move_frame(dt, self.canvas.width, self.canvas.height);
+        }
     }
 
     pub fn tick(&mut self, dt: f64) {
