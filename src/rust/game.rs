@@ -26,14 +26,14 @@ impl Game {
         self.shape.render(&mut self.canvas);
     }
 
-    fn move_frame(&mut self) {
-        self.shape.move_frame(self.canvas.width, self.canvas.height);
+    fn move_frame(&mut self, dt: f64) {
+        self.shape.move_frame(dt, self.canvas.width, self.canvas.height);
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self, dt: f64) {
         self.canvas.clear();
 
-        self.move_frame();
+        self.move_frame(dt);
         self.render();
     }
 }

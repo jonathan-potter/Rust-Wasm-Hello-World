@@ -22,8 +22,8 @@ impl MovingObject {
         MovingObject {
             x: 100.0,
             y: 100.0,
-            dx: 2.0,
-            dy: 2.0,
+            dx: 100.0,
+            dy: 100.0,
         }
     }
 
@@ -31,18 +31,21 @@ impl MovingObject {
         canvas.drawCircle(self.x, self.y)
     }
 
-    pub fn move_frame(&mut self, width: f64, height: f64) {
+    pub fn move_frame(&mut self, dt: f64, width: f64, height: f64) {
         let top = 0.0;
         let left = 0.0;
         let bottom = height;
         let right = width;
 
-        if self.y < top { self.dy = -self.dy; }
-        if self.x < left { self.dx = -self.dx; }
-        if bottom < self.y { self.dy = -self.dy; }
-        if right < self.x { self.dx = -self.dx; }
+        let dx = self.dx * dt;
+        let dy = self.dy * dt;
 
-        self.x += self.dx;
-        self.y += self.dy;
+        if self.y + dy < top { self.dy = -self.dy; }
+        if self.x + dy < left { self.dx = -self.dx; }
+        if bottom < self.y + dy { self.dy = -self.dy; }
+        if right < self.x + dx { self.dx = -self.dx; }
+
+        self.x += self.dx * dt;
+        self.y += self.dy * dt;
     }
 }

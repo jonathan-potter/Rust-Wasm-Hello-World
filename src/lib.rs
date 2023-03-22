@@ -27,7 +27,7 @@ impl Integration {
         })
     }
 
-    pub fn tick(&mut self) {
-        self.game.tick();
+    pub fn tick(&mut self, time: f64) {
+        self.game.tick(time);
     }
 }
