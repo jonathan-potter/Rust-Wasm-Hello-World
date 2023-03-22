@@ -1,3 +1,4 @@
+use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
@@ -35,6 +36,20 @@ impl Game {
 
         // self.move_frame(dt);
         // self.render();
-        self.canvas.draw();
+
+        let positions = Array::new();
+
+        let position1 = Array::new();
+        position1.push(&JsValue::from_f64(10.0));
+        position1.push(&JsValue::from_f64(20.0));
+
+        let position2 = Array::new();
+        position2.push(&JsValue::from_f64(30.0));
+        position2.push(&JsValue::from_f64(40.0));
+
+        positions.push(&position1);
+        positions.push(&position2);
+
+        self.canvas.render(positions);
     }
 }

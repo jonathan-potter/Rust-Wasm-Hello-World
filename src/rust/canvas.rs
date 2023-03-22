@@ -1,13 +1,14 @@
+use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{WebGlProgram, WebGlRenderingContext, WebGlShader};
+use web_sys::{WebGlProgram, WebGlRenderingContext};
 
-use crate::utility::geometry_utils::{create_indices_buffer, create_vertex_buffer};
 use crate::utility::shader_utils::{compile_shader, link_program};
 
 #[wasm_bindgen]
 pub struct Canvas {
     context: WebGlRenderingContext,
+    program: WebGlProgram,
     pub width: f64,
     pub height: f64,
 }
@@ -32,24 +33,25 @@ impl Canvas {
             .ok_or("no webgl context")?
             .dyn_into::<WebGlRenderingContext>()?;
 
-        Ok(Canvas {
-            context,
-            width: 640.0,
-            height: 480.0,
-        })
-    }
-
-    pub fn draw(&mut self) -> Result<(), JsValue> {
         let vertex_shader = compile_shader(
-            &self.context,
+            &context,
             WebGlRenderingContext::VERTEX_SHADER,
-            r#"attribute vec4 position;
+            r#"
+            attribute vec2 position;
+            uniform vec2 u_resolution;
+
             void main() {
-                gl_Position = position;
-            }"#,
+                vec2 zeroToOne = position / u_resolution;
+                vec2 zeroToTwo = zeroToOne * 2.0;
+                vec2 clipSpace = zeroToTwo - 1.0;
+
+                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+            }
+            "#,
         )?;
+
         let fragment_shader = compile_shader(
-            &self.context,
+            &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
             r#"precision mediump float;
             void main() {
@@ -57,48 +59,59 @@ impl Canvas {
             }"#,
         )?;
 
-        let program = link_program(&self.context, &vertex_shader, &fragment_shader)?;
-        self.context.use_program(Some(&program));
+        let program = link_program(&context, &vertex_shader, &fragment_shader)?;
+        context.use_program(Some(&program));
 
-        let vertex_positions = vec![-0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0];
-        let vertex_buffer = create_vertex_buffer(&self.context, &vertex_positions)?;
+        Ok(Canvas {
+            context,
+            program,
+            width: 640.0,
+            height: 480.0,
+        })
+    }
 
-        let indices = vec![0, 1, 2];
-        let index_buffer = create_indices_buffer(&self.context, &indices)?;
-
-        self.context.bind_buffer(
-            WebGlRenderingContext::ARRAY_BUFFER,
-            Some(&vertex_buffer),
-        );
-        self.context.bind_buffer(
-            WebGlRenderingContext::ELEMENT_ARRAY_BUFFER,
-            Some(&index_buffer),
-        );
-
-        let position_attrib_location = self
+    pub fn render(&mut self, positions: Array) {
+        // Set the u_resolution uniform
+        let resolution_location = self
             .context
-            .get_attrib_location(&program, "position") as u32;
-        self.context.enable_vertex_attrib_array(position_attrib_location);
-
-        self.context.vertex_attrib_pointer_with_i32(
-            position_attrib_location,
-            3,
-            WebGlRenderingContext::FLOAT,
-            false,
-            0,
-            0,
+            .get_uniform_location(&self.program, "u_resolution")
+            .unwrap();
+        self.context.uniform2f(
+            Some(&resolution_location),
+            self.width as f32,
+            self.height as f32,
         );
 
-        self.context.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT);
+        for i in 0..positions.length() {
+            let position = positions.get(i).unchecked_into::<js_sys::Array>();
+            let x = position.get(0).as_f64().unwrap() as f32;
+            let y = position.get(1).as_f64().unwrap() as f32;
+            self.draw_triangle(x, y);
+        }
+    }
 
-        self.context.draw_elements_with_i32(
-            WebGlRenderingContext::TRIANGLES,
-            indices.len() as i32,
-            WebGlRenderingContext::UNSIGNED_SHORT,
-            0,
+    fn draw_triangle(&mut self, x: f32, y: f32) {
+        let vertices: [f32; 6] = [
+            x, y,
+            x + 10.0, y + 10.0,
+            x + 20.0, y,
+        ];
+
+        let buffer = self.context.create_buffer().unwrap();
+        self.context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
+
+        // Convert the vertices array into a Float32Array
+        let vertices_js_array = js_sys::Float32Array::from(&vertices[..]);
+
+        self.context.buffer_data_with_array_buffer_view(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            &vertices_js_array,
+            WebGlRenderingContext::STATIC_DRAW,
         );
 
-        Ok(())
+        self.context.vertex_attrib_pointer_with_i32(0, 2, WebGlRenderingContext::FLOAT, false, 0, 0);
+        self.context.enable_vertex_attrib_array(0);
+
+        self.context.draw_arrays(WebGlRenderingContext::TRIANGLES, 0, (vertices.len() / 2) as i32);
     }
 }
