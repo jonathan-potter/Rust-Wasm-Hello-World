@@ -27,7 +27,7 @@ impl Game {
     }
 
     fn move_frame(&mut self) {
-        self.shape.move_frame();
+        self.shape.move_frame(self.canvas.width, self.canvas.height);
     }
 
     pub fn tick(&mut self) {

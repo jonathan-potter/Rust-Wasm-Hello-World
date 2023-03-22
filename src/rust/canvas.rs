@@ -8,6 +8,8 @@ pub struct Canvas {
     window: Window,
     document: Document,
     context: CanvasRenderingContext2d,
+    pub width: f64,
+    pub height: f64,
 }
 
 #[wasm_bindgen]
@@ -28,11 +30,13 @@ impl Canvas {
             window,
             document,
             context,
+            width: 640.0,
+            height: 480.0,
         })
     }
 
     pub fn clear(&mut self) {
-        self.context.clear_rect(0.0, 0.0, 640.0, 480.0);
+        self.context.clear_rect(0.0, 0.0, self.width, self.height);
     }
 
     pub fn drawCircle(&mut self, x: f64, y: f64) {
