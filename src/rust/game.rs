@@ -24,7 +24,15 @@ impl Game {
     }
 
     fn render(&mut self) {
-        self.shape.render(&mut self.canvas);
+        let positions = Array::new();
+
+        let position1 = Array::new();
+        position1.push(&JsValue::from_f64(self.shape.x));
+        position1.push(&JsValue::from_f64(self.shape.y));
+
+        positions.push(&position1);
+
+        self.canvas.render(positions);
     }
 
     fn move_frame(&mut self, dt: f64) {
@@ -32,24 +40,7 @@ impl Game {
     }
 
     pub fn tick(&mut self, dt: f64) {
-        // self.canvas.clear();
-
-        // self.move_frame(dt);
-        // self.render();
-
-        let positions = Array::new();
-
-        let position1 = Array::new();
-        position1.push(&JsValue::from_f64(10.0));
-        position1.push(&JsValue::from_f64(20.0));
-
-        let position2 = Array::new();
-        position2.push(&JsValue::from_f64(30.0));
-        position2.push(&JsValue::from_f64(40.0));
-
-        positions.push(&position1);
-        positions.push(&position2);
-
-        self.canvas.render(positions);
+        self.move_frame(dt);
+        self.render();
     }
 }

@@ -9,8 +9,8 @@ use crate::Canvas;
 
 #[wasm_bindgen]
 pub struct MovingObject {
-    x: f64,
-    y: f64,
+    pub x: f64,
+    pub y: f64,
     dx: f64,
     dy: f64,
 }
