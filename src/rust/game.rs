@@ -1,4 +1,5 @@
 use js_sys::Array;
+use rand::Rng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
@@ -17,15 +18,20 @@ pub struct Game {
 impl Game {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas: Canvas) -> Game {
-        let shapes =
+        let mut rng = rand::thread_rng();
+        let shapes = (0..10) // Change this number to generate more or fewer shapes
+            .map(|_| {
+                let x = rng.gen_range(0.0..canvas.width);
+                let y = rng.gen_range(0.0..canvas.height);
+                let dx = rng.gen_range(-100.0..100.0);
+                let dy = rng.gen_range(-100.0..100.0);
+                MovingObject::new(x, y, dx, dy)
+            })
+            .collect::<Vec<MovingObject>>();
 
         Game {
-            canvas: canvas,
-            shapes: vec![
-                MovingObject::new(100.0, 100.0, 100.0, 100.0),
-                MovingObject::new(100.0, 200.0, 100.0, 100.0),
-                MovingObject::new(100.0, 300.0, 100.0, 100.0),
-            ],
+            canvas,
+            shapes,
         }
     }
 
