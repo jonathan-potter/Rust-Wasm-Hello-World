@@ -4,8 +4,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{WebGlProgram, WebGlRenderingContext};
 
 use crate::utility::shader_utils::{compile_shader, link_program};
+use crate::MovingObject;
 
-#[wasm_bindgen]
 pub struct Canvas {
     context: WebGlRenderingContext,
     program: WebGlProgram,
@@ -13,9 +13,7 @@ pub struct Canvas {
     pub height: f64,
 }
 
-#[wasm_bindgen]
 impl Canvas {
-    #[wasm_bindgen(constructor)]
     pub fn new() -> Result<Canvas, JsValue> {
         let window = web_sys::window().ok_or("no window")?;
         let document = window.document().ok_or("no document")?;
@@ -54,8 +52,9 @@ impl Canvas {
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
             r#"precision mediump float;
+            uniform vec4 color;
             void main() {
-                gl_FragColor = vec4(1, 0, 0, 1);
+                gl_FragColor = color;
             }"#,
         )?;
 
@@ -70,7 +69,7 @@ impl Canvas {
         })
     }
 
-    pub fn render(&mut self, positions: Array) {
+    pub fn render(&mut self, shapes: &Vec<MovingObject>) {
         // Set the u_resolution uniform
         let resolution_location = self
             .context
@@ -82,20 +81,33 @@ impl Canvas {
             self.height as f32,
         );
 
-        for i in 0..positions.length() {
-            let position = positions.get(i).unchecked_into::<js_sys::Array>();
-            let x = position.get(0).as_f64().unwrap() as f32;
-            let y = position.get(1).as_f64().unwrap() as f32;
-            self.draw_triangle(x, y);
+        for shape in shapes {
+            self.draw_triangle(&shape);
         }
     }
 
-    fn draw_triangle(&mut self, x: f32, y: f32) {
+    fn draw_triangle(&mut self, shape: &MovingObject) {
+        let x = shape.x as f32;
+        let y = shape.y as f32;
+        let color = &shape.color;
+
         let vertices: [f32; 6] = [
             x, y,
             x + 10.0, y + 10.0,
             x + 20.0, y,
         ];
+
+        let color_location = self
+            .context
+            .get_uniform_location(&self.program, "color")
+            .unwrap();
+        self.context.uniform4f(
+            Some(&color_location),
+            color[0],
+            color[1],
+            color[2],
+            color[3],
+        );
 
         let buffer = self.context.create_buffer().unwrap();
         self.context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));

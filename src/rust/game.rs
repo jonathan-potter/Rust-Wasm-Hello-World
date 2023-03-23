@@ -8,18 +8,15 @@ use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, Window};
 use crate::Canvas;
 use crate::MovingObject;
 
-#[wasm_bindgen]
 pub struct Game {
     canvas: Canvas,
     shapes: Vec<MovingObject>,
 }
 
-#[wasm_bindgen]
 impl Game {
-    #[wasm_bindgen(constructor)]
     pub fn new(canvas: Canvas) -> Game {
         let mut rng = rand::thread_rng();
-        let shapes = (0..10) // Change this number to generate more or fewer shapes
+        let shapes = (0..100) // Change this number to generate more or fewer shapes
             .map(|_| {
                 let x = rng.gen_range(0.0..canvas.width);
                 let y = rng.gen_range(0.0..canvas.height);
@@ -36,18 +33,18 @@ impl Game {
     }
 
     fn render(&mut self) {
-        let positions = self.shapes.iter().map(|s| (s.x, s.y)).collect::<Vec<_>>();
-        let positions_js_array = positions
-            .iter()
-            .map(|(x, y)| {
-                let position = Array::new();
-                position.push(&JsValue::from_f64(*x as f64));
-                position.push(&JsValue::from_f64(*y as f64));
-                position
-            })
-            .collect::<Array>();
+        // let positions = self.shapes.iter().map(|s| (s.x, s.y)).collect::<Vec<_>>();
+        // let positions_js_array = positions
+        //     .iter()
+        //     .map(|(x, y)| {
+        //         let position = Array::new();
+        //         position.push(&JsValue::from_f64(*x as f64));
+        //         position.push(&JsValue::from_f64(*y as f64));
+        //         position
+        //     })
+        //     .collect::<Array>();
 
-        self.canvas.render(positions_js_array);
+        self.canvas.render(&self.shapes);
     }
 
     fn move_frame(&mut self, dt: f64) {

@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -7,19 +8,26 @@ use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, Window};
 
 use crate::Canvas;
 
-#[wasm_bindgen]
 pub struct MovingObject {
+    pub color: Vec<f32>,
     pub x: f64,
     pub y: f64,
     dx: f64,
     dy: f64,
 }
 
-#[wasm_bindgen]
 impl MovingObject {
-    #[wasm_bindgen(constructor)]
     pub fn new(x: f64, y: f64, dx: f64, dy: f64) -> MovingObject {
+        let mut rng = rand::thread_rng();
+        let color = vec!(
+            rng.gen_range(0.0..1.0),
+            rng.gen_range(0.0..1.0),
+            rng.gen_range(0.0..1.0),
+            1.0,
+        );
+
         MovingObject {
+            color,
             x,
             y,
             dx,
