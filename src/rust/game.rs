@@ -16,7 +16,7 @@ pub struct Game {
 impl Game {
     pub fn new(canvas: Canvas) -> Game {
         let mut rng = rand::thread_rng();
-        let shapes = (0..10000) // Change this number to generate more or fewer shapes
+        let shapes = (0..100000) // Change this number to generate more or fewer shapes
             .map(|_| {
                 let x = rng.gen_range(0.0..canvas.width);
                 let y = rng.gen_range(0.0..canvas.height);

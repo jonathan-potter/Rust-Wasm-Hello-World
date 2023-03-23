@@ -23,8 +23,8 @@ impl Canvas {
 
         document.body().unwrap().append_child(&canvas)?;
 
-        canvas.set_width(640);
-        canvas.set_height(480);
+        canvas.set_width(window.inner_width()?.as_f64().ok_or(":(")? as u32);
+        canvas.set_height(window.inner_height()?.as_f64().ok_or(":(")? as u32);
 
         let context = canvas
             .get_context("webgl")?
@@ -67,8 +67,8 @@ impl Canvas {
         Ok(Canvas {
             context,
             program,
-            width: 640.0,
-            height: 480.0,
+            width: window.inner_width()?.as_f64().ok_or(":(")?,
+            height: window.inner_height()?.as_f64().ok_or(":(")?,
         })
     }
 
