@@ -36,7 +36,9 @@ impl Canvas {
             WebGlRenderingContext::VERTEX_SHADER,
             r#"
             attribute vec2 position;
+            attribute vec4 color;
             uniform vec2 u_resolution;
+            varying vec4 v_color;
 
             void main() {
                 vec2 zeroToOne = position / u_resolution;
@@ -44,6 +46,7 @@ impl Canvas {
                 vec2 clipSpace = zeroToTwo - 1.0;
 
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+                v_color = color;
             }
             "#,
         )?;
@@ -52,9 +55,9 @@ impl Canvas {
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
             r#"precision mediump float;
-            uniform vec4 color;
+            varying vec4 v_color;
             void main() {
-                gl_FragColor = color;
+                gl_FragColor = v_color;
             }"#,
         )?;
 
@@ -69,8 +72,7 @@ impl Canvas {
         })
     }
 
-    pub fn render(&mut self, shapes: &Vec<MovingObject>) {
-        // Set the u_resolution uniform
+    pub fn render(&mut self, moving_objects: &Vec<MovingObject>) {
         let resolution_location = self
             .context
             .get_uniform_location(&self.program, "u_resolution")
@@ -81,39 +83,33 @@ impl Canvas {
             self.height as f32,
         );
 
-        for shape in shapes {
-            self.draw_triangle(&shape);
+        let mut vertices = Vec::new();
+        let mut colors = Vec::new();
+
+        for obj in moving_objects {
+            let x = obj.x as f32;
+            let y = obj.y as f32;
+
+            vertices.extend_from_slice(&[
+                x, y,
+                x + 10.0, y + 10.0,
+                x + 20.0, y,
+            ]);
+
+            for _ in 0..3 {
+                colors.extend_from_slice(&obj.color);
+            }
         }
+
+        self.draw_triangles(&vertices, &colors);
     }
 
-    fn draw_triangle(&mut self, shape: &MovingObject) {
-        let x = shape.x as f32;
-        let y = shape.y as f32;
-        let color = &shape.color;
-
-        let vertices: [f32; 6] = [
-            x, y,
-            x + 10.0, y + 10.0,
-            x + 20.0, y,
-        ];
-
-        let color_location = self
-            .context
-            .get_uniform_location(&self.program, "color")
-            .unwrap();
-        self.context.uniform4f(
-            Some(&color_location),
-            color[0],
-            color[1],
-            color[2],
-            color[3],
-        );
-
+    fn draw_triangles(&mut self, vertices: &[f32], colors: &[f32]) {
         let buffer = self.context.create_buffer().unwrap();
         self.context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
 
         // Convert the vertices array into a Float32Array
-        let vertices_js_array = js_sys::Float32Array::from(&vertices[..]);
+        let vertices_js_array = js_sys::Float32Array::from(vertices);
 
         self.context.buffer_data_with_array_buffer_view(
             WebGlRenderingContext::ARRAY_BUFFER,
@@ -123,6 +119,21 @@ impl Canvas {
 
         self.context.vertex_attrib_pointer_with_i32(0, 2, WebGlRenderingContext::FLOAT, false, 0, 0);
         self.context.enable_vertex_attrib_array(0);
+
+        let color_buffer = self.context.create_buffer().unwrap();
+        self.context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&color_buffer));
+
+        // Convert the colors array into a Float32Array
+        let colors_js_array = js_sys::Float32Array::from(colors);
+
+        self.context.buffer_data_with_array_buffer_view(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            &colors_js_array,
+            WebGlRenderingContext::STATIC_DRAW,
+        );
+
+        self.context.vertex_attrib_pointer_with_i32(1, 4, WebGlRenderingContext::FLOAT, false, 0, 0);
+        self.context.enable_vertex_attrib_array(1);
 
         self.context.draw_arrays(WebGlRenderingContext::TRIANGLES, 0, (vertices.len() / 2) as i32);
     }
