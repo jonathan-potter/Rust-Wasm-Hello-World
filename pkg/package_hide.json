@@ -1,0 +1,14 @@
+{
+  "name": "wasm_rust_playground",
+  "version": "0.1.0",
+  "files": [
+    "wasm_rust_playground_bg.wasm",
+    "wasm_rust_playground.js",
+    "wasm_rust_playground.d.ts"
+  ],
+  "module": "wasm_rust_playground.js",
+  "types": "wasm_rust_playground.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
